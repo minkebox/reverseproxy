@@ -22,7 +22,7 @@ function ddns() {
       for name in $ddns_names; do
         hostname=$(echo $name | cut -d'#' -f 1)
         domainname=$(echo $name | cut -d'#' -f 2-)
-        url=$(echo $DDNS_URL | sed "s/{{IP}}/${IP}/g" | sed "s/{{HOSTNAME}}/${hostname}/g" | sed "s/{{DOMAINNAME}}/${domainname}/g")
+        url=$(echo $DDNS_URL | sed "s/{{IP}}/${external_ip}/g" | sed "s/{{HOSTNAME}}/${hostname}/g" | sed "s/{{DOMAINNAME}}/${domainname}/g")
         wget --no-check-certificate -S -O - "${url}"
       done
     fi
