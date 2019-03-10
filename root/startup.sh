@@ -8,6 +8,9 @@ fi
 
 IP=$(ip addr show dev ${IFACE} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | head -1)
 
+touch /etc/dnshosts.d/hosts.conf
+dnsmasq
+
 ddns_names=""
 last_external_ip=""
 function ddns() {
@@ -17,7 +20,9 @@ function ddns() {
     if [ "${external_ip}" != "${last_external_ip}" ]; then
       last_external_ip=${external_ip}
       for name in $ddns_names; do
-        url=$(echo $DDNS_URL | sed "s/{{IP}}/${IP}/g" | sed "s/{{HOSTNAME}}/@/g" | sed "s/{{DOMAINNAME}/${name}/g")
+        hostname=$(echo $name | cut -d'#' -f 1)
+        domainname=$(echo $name | cut -d'#' -f 2-)
+        url=$(echo $DDNS_URL | sed "s/{{IP}}/${IP}/g" | sed "s/{{HOSTNAME}}/${hostname}/g" | sed "s/{{DOMAINNAME}/${domainname}/g")
         wget --no-check-certificate -q -O - "${url}"
       done
     fi
@@ -47,16 +52,23 @@ server {
       echo "${IP} ${gsite}" >> /etc/dnshosts.d/hosts.conf
       if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
         echo "${IP} ${gsite}.${__DOMAINNAME}" >> /etc/dnshosts.d/hosts.conf
-      else
-        ddns_names="${dds_names} ${gsite}"
+      elif [ "${DDNS_URL}" != "" ]; then
+        hostname=$(echo ${gsite} | cut -d'.' -f 1)
+        domainname=$(echo ${gsite} | cut -d'.' -f 2-)
+        if [ "$(echo ${domainname} | grep '\.')" = "" ]; then
+          ddns_names="${dds_names} @#${hostname}.${domainname}"
+        elif [ "$(whois ${domainname} | grep 'NOT FOUND')" != "" ]; then
+          ddns_names="${dds_names} @#${hostname}.${domainname}"
+        else
+          ddns_names="${dds_names} ${hostname}#${domainname}"
+        fi
       fi
     done
   fi
 done
 
 nginx
-dnsmasq
-if [ "${DDNS_URL}" != "" ]; then
+if [ "${ddns_names}" != "" ]; then
   ddns &
 fi
 
