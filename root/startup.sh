@@ -1,4 +1,4 @@
-#! /bin/sh -x
+#! /bin/sh
 
 if [ "${__HOME_INTERFACE}" != "" ]; then
   IFACE=${__HOME_INTERFACE}
