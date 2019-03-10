@@ -5,6 +5,6 @@ RUN apk --no-cache add nginx dnsmasq miniupnpc ;\
 
 COPY root/ /
 
-EXPOSE 80 443 
+EXPOSE 80 
 
 ENTRYPOINT ["/startup.sh"]

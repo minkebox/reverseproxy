@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/sh -x
 
 if [ "${__HOME_INTERFACE}" != "" ]; then
   IFACE=${__HOME_INTERFACE}
@@ -22,13 +22,22 @@ function ddns() {
       for name in $ddns_names; do
         hostname=$(echo $name | cut -d'#' -f 1)
         domainname=$(echo $name | cut -d'#' -f 2-)
-        url=$(echo $DDNS_URL | sed "s/{{IP}}/${IP}/g" | sed "s/{{HOSTNAME}}/${hostname}/g" | sed "s/{{DOMAINNAME}/${domainname}/g")
-        wget --no-check-certificate -q -O - "${url}"
+        url=$(echo $DDNS_URL | sed "s/{{IP}}/${IP}/g" | sed "s/{{HOSTNAME}}/${hostname}/g" | sed "s/{{DOMAINNAME}}/${domainname}/g")
+        wget --no-check-certificate -S -O - "${url}"
       done
     fi
     sleep 1800 &
   done
 }
+
+# By default, if we cannot identify the correct server, we error.
+echo "
+server {
+  server_name _;
+  listen *:${HTTP_PORT} default_server;
+  return 404;
+}
+" > /etc/nginx/conf.d/__default.conf
 
 for website in ${WEBSITES}; do
   site=$(echo $website | cut -d"#" -f 1)
@@ -39,9 +48,8 @@ for website in ${WEBSITES}; do
     echo "
 server {
   server_name ${globalsites};
-  listen *:80;
+  listen *:${HTTP_PORT};
   location ~ {
-    proxy_bind ${IP};
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_pass http://${site}:${port};
@@ -56,9 +64,9 @@ server {
         hostname=$(echo ${gsite} | cut -d'.' -f 1)
         domainname=$(echo ${gsite} | cut -d'.' -f 2-)
         if [ "$(echo ${domainname} | grep '\.')" = "" ]; then
-          ddns_names="${dds_names} @#${hostname}.${domainname}"
+          ddns_names="${dds_names} #${hostname}.${domainname}"
         elif [ "$(whois ${domainname} | grep 'NOT FOUND')" != "" ]; then
-          ddns_names="${dds_names} @#${hostname}.${domainname}"
+          ddns_names="${dds_names} #${hostname}.${domainname}"
         else
           ddns_names="${dds_names} ${hostname}#${domainname}"
         fi
