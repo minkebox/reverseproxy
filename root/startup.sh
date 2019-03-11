@@ -105,6 +105,6 @@ if [ "${ddns_names}" != "" ]; then
 fi
 
 # Run until stopped
-trap "nginx quit ; killall dnsmasq ; exit" TERM INT
+trap "nginx -s quit ; killall dnsmasq ; exit" TERM INT
 sleep 2147483647d &
 wait "$!"
