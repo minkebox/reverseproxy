@@ -91,6 +91,12 @@ server {
   }
 }
 " > /etc/nginx/conf.d/${firstsite}.conf
+  for gsite in ${globalsites}; do
+    echo "${IP} ${gsite}" >> /etc/dnshosts.d/hosts.conf
+    if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
+      echo "${IP} ${gsite}.${__DOMAINNAME}" >> /etc/dnshosts.d/hosts.conf
+    fi
+  done
 done
 
 nginx
