@@ -8,7 +8,7 @@ fi
 
 IP=$(ip addr show dev ${IFACE} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | head -1)
 
-touch /etc/dnshosts.d/hosts.conf
+mkdir -p /etc/dnshosts.d
 dnsmasq
 
 # By default, if we cannot identify the correct server, we 404.
@@ -39,9 +39,11 @@ server {
 }
 " > /etc/nginx/conf.d/${firstsite}.conf
     for gsite in ${globalsites}; do
-      echo "${IP} ${gsite}" >> /etc/dnshosts.d/hosts.conf
       if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
-        echo "${IP} ${gsite}.${__DOMAINNAME}" >> /etc/dnshosts.d/hosts.conf
+        echo "${IP} ${gsite}
+${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
+      else
+        echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
       fi
     done
   fi
@@ -63,9 +65,11 @@ server {
 }
 " > /etc/nginx/conf.d/${firstsite}.conf
   for gsite in ${globalsites}; do
-    echo "${IP} ${gsite}" >> /etc/dnshosts.d/hosts.conf
     if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
-      echo "${IP} ${gsite}.${__DOMAINNAME}" >> /etc/dnshosts.d/hosts.conf
+      echo "${IP} ${gsite}
+${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
+    else
+      echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
     fi
   done
 done
