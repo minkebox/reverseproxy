@@ -37,7 +37,7 @@ server {
     proxy_pass http://${site}:${port};
   }
 }
-" > /etc/nginx/conf.d/${firstsite}.conf
+" > /etc/nginx/sites-enabled/${firstsite}.conf
     for gsite in ${globalsites}; do
       if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
         echo "${IP} ${gsite}
@@ -63,7 +63,7 @@ server {
     proxy_pass ${url};
   }
 }
-" > /etc/nginx/conf.d/${firstsite}.conf
+" > /etc/nginx/sites-enabled/${firstsite}.conf
   for gsite in ${globalsites}; do
     if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
       echo "${IP} ${gsite}
