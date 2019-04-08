@@ -11,14 +11,30 @@ IP=$(ip addr show dev ${IFACE} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | he
 mkdir -p /etc/dnshosts.d
 dnsmasq
 
+# Setup acme.sh
+. /etc/acme.sh/acme.sh.env
+
 # By default, if we cannot identify the correct server, we 404.
-echo "
+if [ "${LETS_ENCRYPT}" = "false" ]; then
+  echo "
 server {
   server_name _;
-  listen *:${HTTP_PORT} default_server;
+  listen *:80 default_server;
   return 404;
 }
 " > /etc/nginx/conf.d/__default.conf
+else
+  echo "
+server {
+  server_name _;
+  listen *:80 default_server;
+  listen *:443 ssl http2 default_server;
+  ssl_certificate /etc/nginx/dummykeys/dummy.crt;
+  ssl_certificate_key /etc/nginx/dummykeys/dummy.key;
+  return 404;
+}
+" > /etc/nginx/conf.d/__default.conf
+fi
 
 for website in ${WEBSITES}; do
   site=$(echo $website | cut -d"#" -f 1)
@@ -27,10 +43,11 @@ for website in ${WEBSITES}; do
   firstsite=$(echo $globalsites | cut -d" " -f 1)
   enabled=$(echo $website | cut -d"#" -f 4)
   if [ "${enabled}" = "true" -a "${globalsites}" != "" ]; then
-    echo "
+    if [ "${LETS_ENCRYPT}" = "false" ]; then
+      echo "
 server {
   server_name ${globalsites};
-  listen *:${HTTP_PORT};
+  listen *:80;
   location ~ {
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -38,6 +55,41 @@ server {
   }
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
+    else
+      echo "
+server {
+  server_name ${globalsites};
+  listen *:80;
+  location ^~ /.well-known/acme-challenge/ {
+    alias /acme/.well-known/acme-challenge/;
+  }
+  location ~ {
+    return 302 https://${firstsite}\$request_uri;
+  }
+}
+server {
+  server_name ${globalsites};
+  listen *:443 ssl http2;
+  ssl on;
+  ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
+  ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
+  ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
+  location ~ {
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_pass http://${site}:${port};
+  }
+}
+" > /etc/nginx/sites-enabled/${firstsite}.conf
+      if [ ! -d /etc/nginx/acme.sh/${firstsite} ]; then
+        # Use dummy certs so we can startup nginx and request real ones
+        echo "Copy dummy certs into ${firstsite}"
+        mkdir -p /etc/nginx/acme.sh/${firstsite}
+        cp /etc/nginx/dummykeys/dummy.crt /etc/nginx/acme.sh/${firstsite}/crt
+        cp /etc/nginx/dummykeys/dummy.crt /etc/nginx/acme.sh/${firstsite}/fullcrt
+        cp /etc/nginx/dummykeys/dummy.key /etc/nginx/acme.sh/${firstsite}/key
+      fi
+    fi
     for gsite in ${globalsites}; do
       if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
         echo "${IP} ${gsite}
@@ -53,10 +105,11 @@ for website in ${OTHER_WEBSITES}; do
   url=$(echo $website | cut -d"#" -f 1)
   globalsites=$(echo $website | cut -d"#" -f 2 | sed "s/,/ /g")
   firstsite=$(echo $globalsites | cut -d" " -f 1)
-  echo "
+  if [ "${LETS_ENCRYPT}" = "false" ]; then
+    echo "
 server {
   server_name ${globalsites};
-  listen *:${HTTP_PORT};
+  listen *:80;
   location ~ {
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -64,6 +117,10 @@ server {
   }
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
+  else
+    echo "
+" > /etc/nginx/sites-enabled/${firstsite}.conf
+  fi
   for gsite in ${globalsites}; do
     if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
       echo "${IP} ${gsite}
@@ -83,7 +140,37 @@ if [ "$(ps | grep nginx | grep master)" = "" ]; then
   nginx
 fi
 
+if [ "${LETS_ENCRYPT}" = "true" ]; then
+  # Request any certs we don't already have
+  mkdir -p /acme
+  chmod 755 /acme
+  for website in ${WEBSITES}; do
+    globalsites=$(echo $website | cut -d"#" -f 3 | sed "s/,/ /g")
+    firstsite=$(echo $globalsites | cut -d" " -f 1)
+    enabled=$(echo $website | cut -d"#" -f 4)
+    if [ "${enabled}" = "true" ]; then
+      # Request keys if we're currently using the dummy key
+      if cmp -s /etc/nginx/acme.sh/${firstsite}/key /etc/nginx/dummykeys/dummy.key; then
+        acme.sh --issue --force -d $(echo ${globalsites} | sed "s/ / -d /g") -w /acme
+        if [ -e /etc/acme.sh/data/${firstsite}/${firstsite}.cer ]; then
+          acme.sh --install-cert -d ${firstsite} \
+            --cert-file /etc/nginx/acme.sh/${firstsite}/crt \
+            --key-file /etc/nginx/acme.sh/${firstsite}/key \
+            --fullchain-file /etc/nginx/acme.sh/${firstsite}/fullcrt \
+            --reloadcmd "nginx -s reload"
+        else
+          echo "Cert issue failure: ${firstsite}"
+        fi
+      fi
+    fi
+  done
+  # Reload for updated certs
+  nginx -s reload
+  # Keep certs up-to-date
+  crond
+fi
+
 # Run until stopped
-trap "nginx -s quit ; killall dnsmasq ; exit" TERM INT
+trap "nginx -s quit ; killall dnsmasq crond; exit" TERM INT
 sleep 2147483647d &
 wait "$!"
