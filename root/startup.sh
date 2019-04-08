@@ -75,6 +75,13 @@ ${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
 done
 
 nginx
+sleep 5
+# If we failed to start, wait a while and retry. This can happen if the servers
+# we're proxying have not started yet.
+if [ "$(ps | grep nginx | grep master)" = "" ]; then
+  sleep 60
+  nginx
+fi
 
 # Run until stopped
 trap "nginx -s quit ; killall dnsmasq ; exit" TERM INT
