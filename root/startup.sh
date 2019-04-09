@@ -53,6 +53,7 @@ server {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_pass http://${site}:${port};
   }
+  access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
     else
@@ -66,6 +67,7 @@ server {
   location ~ {
     return 302 https://${firstsite}\$request_uri;
   }
+  access_log /var/log/nginx/${firstsite}-access.log;
 }
 server {
   server_name ${globalsites};
@@ -79,6 +81,7 @@ server {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_pass http://${site}:${port};
   }
+  access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
       if [ ! -d /etc/nginx/acme.sh/${firstsite} ]; then
@@ -115,10 +118,36 @@ server {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_pass ${url};
   }
+  access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
   else
     echo "
+server {
+  server_name ${globalsites};
+  listen *:80;
+  location ^~ /.well-known/acme-challenge/ {
+    alias /acme/.well-known/acme-challenge/;
+  }
+  location ~ {
+    return 302 https://${firstsite}\$request_uri;
+  }
+  access_log /var/log/nginx/${firstsite}-access.log;
+}
+server {
+  server_name ${globalsites};
+  listen *:443 ssl http2;
+  ssl on;
+  ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
+  ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
+  ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
+  location ~ {
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_pass ${url};
+  }
+  access_log /var/log/nginx/${firstsite}-access.log;
+}
 " > /etc/nginx/sites-enabled/${firstsite}.conf
   fi
   for gsite in ${globalsites}; do
@@ -161,6 +190,23 @@ if [ "${LETS_ENCRYPT}" = "true" ]; then
         else
           echo "Cert issue failure: ${firstsite}"
         fi
+      fi
+    fi
+  done
+  for website in ${OTHER_WEBSITES}; do
+    globalsites=$(echo $website | cut -d"#" -f 2 | sed "s/,/ /g")
+    firstsite=$(echo $globalsites | cut -d" " -f 1)
+    # Request keys if we're currently using the dummy key
+    if cmp -s /etc/nginx/acme.sh/${firstsite}/key /etc/nginx/dummykeys/dummy.key; then
+      acme.sh --issue --force -d $(echo ${globalsites} | sed "s/ / -d /g") -w /acme
+      if [ -e /etc/acme.sh/data/${firstsite}/${firstsite}.cer ]; then
+        acme.sh --install-cert -d ${firstsite} \
+          --cert-file /etc/nginx/acme.sh/${firstsite}/crt \
+          --key-file /etc/nginx/acme.sh/${firstsite}/key \
+          --fullchain-file /etc/nginx/acme.sh/${firstsite}/fullcrt \
+          --reloadcmd "nginx -s reload"
+      else
+        echo "Cert issue failure: ${firstsite}"
       fi
     fi
   done
