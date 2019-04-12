@@ -49,6 +49,7 @@ server {
   server_name ${globalsites};
   listen *:80;
   location ~ {
+    client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
@@ -80,6 +81,7 @@ server {
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
   location ~ {
+    client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
@@ -120,6 +122,7 @@ server {
   server_name ${globalsites};
   listen *:80;
   location ~ {
+    client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
@@ -151,6 +154,7 @@ server {
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
   location ~ {
+    client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
