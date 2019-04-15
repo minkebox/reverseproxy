@@ -176,6 +176,58 @@ ${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
   done
 done
 
+for website in ${REDIRECT_WEBSITES}; do
+  url=$(echo $website | cut -d"#" -f 1)
+  globalsites=$(echo $website | cut -d"#" -f 2 | sed "s/,/ /g")
+  firstsite=$(echo $globalsites | cut -d" " -f 1)
+  if [ "${LETS_ENCRYPT}" = "false" ]; then
+    echo "
+server {
+  server_name ${globalsites};
+  listen *:80;
+  location ~ {
+    return 302 ${url}\$request_uri;
+  }
+  access_log /var/log/nginx/${firstsite}-access.log;
+}
+" > /etc/nginx/sites-enabled/${firstsite}.conf
+  else
+    echo "
+server {
+  server_name ${globalsites};
+  listen *:80;
+  location ^~ /.well-known/acme-challenge/ {
+    alias /acme/.well-known/acme-challenge/;
+  }
+  location ~ {
+    return 302 ${url}\$request_uri;
+  }
+  access_log /var/log/nginx/${firstsite}-access.log;
+}
+server {
+  server_name ${globalsites};
+  listen *:443 ssl http2;
+  ssl on;
+  ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
+  ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
+  ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
+  location ~ {
+    return 302 ${url}\$request_uri;
+  }
+  access_log /var/log/nginx/${firstsite}-access.log;
+}
+" > /etc/nginx/sites-enabled/${firstsite}.conf
+  fi
+  for gsite in ${globalsites}; do
+    if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
+      echo "${IP} ${gsite}
+${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
+    else
+      echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
+    fi
+  done
+done
+
 nginx
 sleep 5
 # If we failed to start, wait a while and retry. This can happen if the servers
@@ -210,6 +262,23 @@ if [ "${LETS_ENCRYPT}" = "true" ]; then
     fi
   done
   for website in ${OTHER_WEBSITES}; do
+    globalsites=$(echo $website | cut -d"#" -f 2 | sed "s/,/ /g")
+    firstsite=$(echo $globalsites | cut -d" " -f 1)
+    # Request keys if we're currently using the dummy key
+    if cmp -s /etc/nginx/acme.sh/${firstsite}/key /etc/nginx/dummykeys/dummy.key; then
+      acme.sh --issue --force -d $(echo ${globalsites} | sed "s/ / -d /g") -w /acme
+      if [ -e /etc/acme.sh/data/${firstsite}/${firstsite}.cer ]; then
+        acme.sh --install-cert -d ${firstsite} \
+          --cert-file /etc/nginx/acme.sh/${firstsite}/crt \
+          --key-file /etc/nginx/acme.sh/${firstsite}/key \
+          --fullchain-file /etc/nginx/acme.sh/${firstsite}/fullcrt \
+          --reloadcmd "nginx -s reload"
+      else
+        echo "Cert issue failure: ${firstsite}"
+      fi
+    fi
+  done
+  for website in ${REDIRECT_WEBSITES}; do
     globalsites=$(echo $website | cut -d"#" -f 2 | sed "s/,/ /g")
     firstsite=$(echo $globalsites | cut -d" " -f 1)
     # Request keys if we're currently using the dummy key
