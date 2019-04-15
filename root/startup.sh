@@ -200,7 +200,7 @@ server {
     alias /acme/.well-known/acme-challenge/;
   }
   location ~ {
-    return 302 ${url}\$request_uri;
+    return 302 ${url}/\$request_uri;
   }
   access_log /var/log/nginx/${firstsite}-access.log;
 }
@@ -212,7 +212,7 @@ server {
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
   location ~ {
-    return 302 ${url}\$request_uri;
+    return 302 ${url}/\$request_uri;
   }
   access_log /var/log/nginx/${firstsite}-access.log;
 }
