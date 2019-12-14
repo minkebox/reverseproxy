@@ -97,7 +97,6 @@ server {
 server {
   server_name ${globalsites};
   listen *:443 ssl http2;
-  ssl on;
   ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
@@ -170,7 +169,6 @@ server {
 server {
   server_name ${globalsites};
   listen *:443 ssl http2;
-  ssl on;
   ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
@@ -228,7 +226,6 @@ server {
 server {
   server_name ${globalsites};
   listen *:443 ssl http2;
-  ssl on;
   ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
