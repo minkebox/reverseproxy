@@ -36,6 +36,27 @@ server {
 " > /etc/nginx/conf.d/__default.conf
 fi
 
+# Attempt to contact all websites before starting up nginx
+# so we dont forward traffic to nothing. This also allows the websites
+# to be registered with the DNS service.
+attempts=3
+failed=1
+while : ; do
+  failed=0
+  attempts=$(expr $attempts - 1)
+  for website in ${WEBSITES}; do
+    site=$(echo $website | cut -d"#" -f 1)
+    check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
+    if [ "$check" = "fail" ]; then
+      failed=1
+    fi
+  done
+  if [ $attempts = 0 -o $failed = 0 ]; then
+    break
+  fi
+  sleep 10
+done
+
 for website in ${WEBSITES}; do
   site=$(echo $website | cut -d"#" -f 1)
   port=$(echo $website | cut -d"#" -f 2)
