@@ -20,6 +20,7 @@ if [ "${LETS_ENCRYPT}" = "false" ]; then
 server {
   server_name _;
   listen [::]:80 default_server;
+  listen 80 default_server;
   return 404;
 }
 " > /etc/nginx/conf.d/__default.conf
@@ -28,7 +29,9 @@ else
 server {
   server_name _;
   listen [::]:80 default_server;
+  listen 80 default_server;
   listen [::]:443 ssl http2 default_server;
+  listen 443 ssl http2 default_server;
   ssl_certificate /etc/nginx/dummykeys/dummy.crt;
   ssl_certificate_key /etc/nginx/dummykeys/dummy.key;
   return 404;
@@ -69,6 +72,7 @@ for website in ${WEBSITES}; do
 server {
   server_name ${globalsites};
   listen [::]:80;
+  listen 80;
   location ~ {
     client_max_body_size 100M;
     proxy_set_header Host \$host;
@@ -86,6 +90,7 @@ server {
 server {
   server_name ${globalsites};
   listen [::]:80;
+  listen 80;
   location ^~ /.well-known/acme-challenge/ {
     alias /acme/.well-known/acme-challenge/;
   }
@@ -97,6 +102,7 @@ server {
 server {
   server_name ${globalsites};
   listen [::]:443 ssl http2;
+  listen 443 ssl http2;
   ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
@@ -141,6 +147,7 @@ for website in ${OTHER_WEBSITES}; do
 server {
   server_name ${globalsites};
   listen [::]:80;
+  listen 80;
   location ~ {
     client_max_body_size 100M;
     proxy_set_header Host \$host;
@@ -158,6 +165,7 @@ server {
 server {
   server_name ${globalsites};
   listen [::]:80;
+  listen 80;
   location ^~ /.well-known/acme-challenge/ {
     alias /acme/.well-known/acme-challenge/;
   }
@@ -169,6 +177,7 @@ server {
 server {
   server_name ${globalsites};
   listen [::]:443 ssl http2;
+  listen 443 ssl http2;
   ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
@@ -204,6 +213,7 @@ for website in ${REDIRECT_WEBSITES}; do
 server {
   server_name ${globalsites};
   listen [::]:80;
+  listen 80;
   location ~ {
     return 302 ${url}\$request_uri;
   }
@@ -215,6 +225,7 @@ server {
 server {
   server_name ${globalsites};
   listen [::]:80;
+  listen 80;
   location ^~ /.well-known/acme-challenge/ {
     alias /acme/.well-known/acme-challenge/;
   }
@@ -226,6 +237,7 @@ server {
 server {
   server_name ${globalsites};
   listen [::]:443 ssl http2;
+  listen 443 ssl http2;
   ssl_certificate /etc/nginx/acme.sh/${firstsite}/fullcrt;
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
