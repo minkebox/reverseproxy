@@ -1,0 +1,182 @@
+{
+  name: `Website Proxy`,
+  description: `Make your websites available to the outside world using HTTP or HTTPS`,
+  image: `registry.minkebox.net/minkebox/reverseproxy`,
+  tags: [ 'Web' ],
+  actions: [
+    {
+      type: `Header`,
+      title: `Websites`
+    },
+    {
+      type: `Environment`,
+      name: `WEBSITES`,
+      style: `Websites`,
+      description: `Select and name each of the websites you wish to publish`,
+      pattern: `{{1}}#{{2}}#{{3}}#{{4}}`,
+      join: ` `
+    },
+    {
+      type: `Header`,
+      title: `Other Websites`
+    },
+    {
+      type: 'Text',
+      text: 'You can published other websites which are not hosted by MinkeBox'
+    },
+    {
+      type: `Environment`,
+      name: `OTHER_WEBSITES`,
+      style: `Table`,
+      description: `Publish non-MinkeBox websites`,
+      headers: [
+        { name: 'URL' },
+        { name: 'Published Name' }
+      ],
+      pattern: `{{0}}#{{1}}`,
+      join: ` `
+    },
+    {
+      type: 'Header',
+      title: 'Redirects'
+    },
+    {
+      type: 'Text',
+      text: 'You can redirect websites to different urls'
+    },
+    {
+      type: `Environment`,
+      name: `REDIRECT_WEBSITES`,
+      style: `Table`,
+      description: `Redirect websites`,
+      headers: [
+        { name: 'Redirect URL' },
+        { name: 'Published Name' }
+      ],
+      pattern: `{{0}}#{{1}}`,
+      join: ` `
+    },
+    {
+      type: `Header`,
+      title: `Internet access`
+    },
+    {
+      type: `Environment`,
+      name: `LETS_ENCRYPT`,
+      style: 'Checkbox',
+      description: `Enable HTTPS support using <b>Let's&nbsp;Encrypt</b>`
+    },
+    {
+      type: `NAT`,
+      name: `WEB_NAT`,
+      description: `Make websites available on the Internet`,
+      visible: `property['Environment#LETS_ENCRYPT'] == true`,
+      ports: [
+        `443/tcp`,
+        `80/tcp`
+      ]
+    },
+    {
+      type: `NAT`,
+      name: `WEB_NAT`,
+      description: `Make websites available on the Internet`,
+      visible: `property['Environment#LETS_ENCRYPT'] == false`,
+      ports: [
+        `80/tcp`
+      ]
+    },
+    {
+      type: `Text`,
+      text: 'If Internet access is enabled, use CNAMEs with your favorite Domain Registry to forward requests to <b>{{__GLOBALNAME}}</b>. This name will automatically track any change to your Home IP address.'
+    },
+    {
+      type: `UPnP`
+    }
+  ],
+  properties: [
+    {
+      type: `Feature`,
+      name: `ddns`
+    },
+    {
+      type: `Environment`,
+      name: `WEBSITES`
+    },
+    {
+      type: `Environment`,
+      name: `OTHER_WEBSITES`
+    },
+    {
+      type: `Environment`,
+      name: `REDIRECT_WEBSITES`
+    },
+    {
+      type: `Environment`,
+      name: `LETS_ENCRYPT`,
+      defaultValue: false
+    },
+    {
+      type: 'Directory',
+      name: '/etc/nginx/acme.sh',
+      style: 'boot'
+    },
+    {
+      type: 'Directory',
+      name: '/etc/acme.sh/data',
+      style: 'boot'
+    },
+    {
+      type: 'Directory',
+      name: '/var/log/nginx',
+      style: 'store',
+      shares: [
+        {
+          name: `/`,
+          description: `Access logs`
+        }
+      ]
+    },
+    {
+      type: `Port`,
+      name: `443/tcp`,
+      port: 443,
+      protocol: `TCP`,
+      nat: false,
+      web: false,
+      dns: false,
+      mdns: null
+    },
+    {
+      type: `Port`,
+      name: `80/tcp`,
+      port: 80,
+      protocol: `TCP`,
+      nat: false,
+      web: false,
+      dns: false,
+      mdns: null
+    },
+    {
+      type: `Port`,
+      name: `53/udp`,
+      port: 53,
+      protocol: `UDP`,
+      nat: false,
+      web: false,
+      dns: true,
+      mdns: null
+    },
+    {
+      type: `Network`,
+      name: `primary`,
+      defaultValue: `home`
+    }
+  ],
+  monitor: {
+    cmd: ``,
+    polling: 0,
+    parser: ``,
+    header: ``,
+    template: ``
+  }
+}
