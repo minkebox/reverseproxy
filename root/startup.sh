@@ -1,10 +1,6 @@
 #! /bin/sh
 
-if [ "${__HOME_INTERFACE}" != "" ]; then
-  IFACE=${__HOME_INTERFACE}
-elif [ "${__PRIVATE_INTERFACE}" != "" ]; then
-  IFACE=${__PRIVATE_INTERFACE}
-fi
+IFACE=eth0
 
 IP=$(ip addr show dev ${IFACE} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | head -1)
 
