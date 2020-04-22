@@ -44,8 +44,8 @@ while : ; do
   failed=0
   attempts=$(expr $attempts - 1)
   for website in ${WEBSITES}; do
-    site=$(echo $website | cut -d"#" -f 1)
-    check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
+    ip=$(echo $website | cut -d"#" -f 5)
+    check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
     if [ "$check" = "fail" ]; then
       failed=1
     fi
@@ -62,6 +62,10 @@ for website in ${WEBSITES}; do
   globalsites=$(echo $website | cut -d"#" -f 3 | sed "s/,/ /g")
   firstsite=$(echo $globalsites | cut -d" " -f 1)
   enabled=$(echo $website | cut -d"#" -f 4)
+  ip=$(echo $website | cut -d"#" -f 5)
+  if [ "$ip" = "" ]; then
+    ip=$site
+  fi
   if [ "${enabled}" = "true" -a "${globalsites}" != "" ]; then
     if [ "${LETS_ENCRYPT}" = "false" ]; then
       echo "
@@ -76,7 +80,7 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://${site}:${port};
+    proxy_pass http://${ip}:${port};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
 }
@@ -109,7 +113,7 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://${site}:${port};
+    proxy_pass http://${ip}:${port};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
 }
