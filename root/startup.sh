@@ -45,6 +45,9 @@ while : ; do
   attempts=$(expr $attempts - 1)
   for website in ${WEBSITES}; do
     ip=$(echo $website | cut -d"#" -f 5)
+    if [ "$ip" = "" ]; then
+      ip=$(echo $website | cut -d"#" -f 1) # Use hostname
+    fi
     check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
     if [ "$check" = "fail" ]; then
       failed=1
