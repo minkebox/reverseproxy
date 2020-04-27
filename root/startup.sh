@@ -37,23 +37,38 @@ fi
 
 # Attempt to contact all websites before starting up nginx
 # so we dont forward traffic to nothing. This also allows the websites
-# to be registered with the DNS service.
+# to be registered with the DNS service. Exclude any sites we cant find.
 attempts=3
 failed=1
 while : ; do
   failed=0
   attempts=$(expr $attempts - 1)
+  AWEBSITES=""
   for website in ${WEBSITES}; do
+    site=$(echo $website | cut -d"#" -f 1)
+    port=$(echo $website | cut -d"#" -f 2)
+    globalsites=$(echo $website | cut -d"#" -f 3)
+    enabled=$(echo $website | cut -d"#" -f 4)
     ip=$(echo $website | cut -d"#" -f 5)
-    if [ "$ip" = "" ]; then
-      ip=$(echo $website | cut -d"#" -f 1) # Use hostname
-    fi
-    check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
+    # Check hostname first
+    okay=1
+    check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
     if [ "$check" = "fail" ]; then
-      failed=1
+      # Fallback on ip
+      check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
+      if [ "$check" = "fail" ]; then
+        failed=1
+        okay=0
+      else
+        site=$ip
+      fi
+    fi
+    if [ "$okay" = "1" ]; then
+      AWEBSITES="${AWEBSITES} $site#$port#$globalsites#$enabled"
     fi
   done
   if [ $attempts = 0 -o $failed = 0 ]; then
+    WEBSITES=${AWEBSITES}
     break
   fi
   sleep 10
@@ -65,10 +80,6 @@ for website in ${WEBSITES}; do
   globalsites=$(echo $website | cut -d"#" -f 3 | sed "s/,/ /g")
   firstsite=$(echo $globalsites | cut -d" " -f 1)
   enabled=$(echo $website | cut -d"#" -f 4)
-  ip=$(echo $website | cut -d"#" -f 5)
-  if [ "$ip" = "" ]; then
-    ip=$site
-  fi
   if [ "${enabled}" = "true" -a "${globalsites}" != "" ]; then
     if [ "${LETS_ENCRYPT}" = "false" ]; then
       echo "
@@ -83,7 +94,7 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://${ip}:${port};
+    proxy_pass http://${site}:${port};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
 }
@@ -116,7 +127,7 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://${ip}:${port};
+    proxy_pass http://${site}:${port};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
 }
