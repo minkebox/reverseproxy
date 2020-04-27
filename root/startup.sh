@@ -50,21 +50,23 @@ while : ; do
     globalsites=$(echo $website | cut -d"#" -f 3)
     enabled=$(echo $website | cut -d"#" -f 4)
     ip=$(echo $website | cut -d"#" -f 5)
-    # Check hostname first
-    okay=1
-    check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
-    if [ "$check" = "fail" ]; then
-      # Fallback on ip
-      check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
+    if [ "$enabled" = "true" ]; then
+      # Check hostname first
+      okay=1
+      check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
       if [ "$check" = "fail" ]; then
-        failed=1
-        okay=0
-      else
-        site=$ip
+        # Fallback on ip
+        check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
+        if [ "$check" = "fail" ]; then
+          failed=1
+          okay=0
+        else
+          site=$ip
+        fi
       fi
-    fi
-    if [ "$okay" = "1" ]; then
-      AWEBSITES="${AWEBSITES} $site#$port#$globalsites#$enabled"
+      if [ "$okay" = "1" ]; then
+        AWEBSITES="${AWEBSITES} $site#$port#$globalsites#$enabled"
+      fi
     fi
   done
   if [ $attempts = 0 -o $failed = 0 ]; then
