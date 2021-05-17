@@ -357,5 +357,12 @@ fi
 
 # Run until stopped
 trap "nginx -s quit ; killall dnsmasq crond; exit" TERM INT
-sleep 2147483647d &
+
+# If we failed to start all the websites, we will restart this whole process in 10 minutes
+# in case the site came online. Otherwise we can wait forever.
+if [ $failed = 1 ]; then
+  sleep 600 &
+else
+  sleep 2147483647d &
+fi
 wait "$!"
