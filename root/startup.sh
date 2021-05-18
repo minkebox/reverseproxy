@@ -66,6 +66,8 @@ while : ; do
       fi
       if [ "$okay" = "1" ]; then
         AWEBSITES="${AWEBSITES} $site#$port#$globalsites#$enabled"
+      else
+        echo "${attempts}: Failed to ping ${site}/${ip}"
       fi
     fi
   done
