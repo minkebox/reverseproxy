@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.12
 
 RUN apk add nginx dnsmasq openssl curl git ;\
     rm -f /etc/nginx/conf.d/default.conf ;\
