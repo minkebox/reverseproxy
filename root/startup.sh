@@ -92,12 +92,22 @@ server {
   listen [::]:80;
   listen 80;
   location ~ {
+    try_files /nonexistant @\$http_upgrade;
+  }
+  location @ {
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_pass http://${site}:${port};
+  }
+  location @websocket {
+    proxy_set_header Host \$host;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "Upgrade";
     proxy_pass http://${site}:${port};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
@@ -125,12 +135,22 @@ server {
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
   location ~ {
+    try_files /nonexistant @\$http_upgrade;
+  }
+  location @ {
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_pass http://${site}:${port};
+  }
+  location @websocket {
+    proxy_set_header Host \$host;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "Upgrade";
     proxy_pass http://${site}:${port};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
@@ -167,12 +187,22 @@ server {
   listen [::]:80;
   listen 80;
   location ~ {
+    try_files /nonexistant @\$http_upgrade;
+  }
+  location @ {
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_pass ${url};
+  }
+  location @websocket {
+    proxy_set_header Host \$host;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "Upgrade";
     proxy_pass ${url};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
@@ -200,12 +230,22 @@ server {
   ssl_certificate_key /etc/nginx/acme.sh/${firstsite}/key;
   ssl_trusted_certificate /etc/nginx/acme.sh/${firstsite}/crt;
   location ~ {
+    try_files /nonexistant @\$http_upgrade;
+  }
+  location @ {
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_pass ${url};
+  }
+  location @websocket {
+    proxy_set_header Host \$host;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "Upgrade";
     proxy_pass ${url};
   }
   access_log /var/log/nginx/${firstsite}-access.log;
