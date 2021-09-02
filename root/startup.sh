@@ -251,6 +251,14 @@ server {
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
+    if [ ! -d /etc/nginx/acme.sh/${firstsite} ]; then
+      # Use dummy certs so we can startup nginx and request real ones
+      echo "Copy dummy certs into ${firstsite}"
+      mkdir -p /etc/nginx/acme.sh/${firstsite}
+      cp /etc/nginx/dummykeys/dummy.crt /etc/nginx/acme.sh/${firstsite}/crt
+      cp /etc/nginx/dummykeys/dummy.crt /etc/nginx/acme.sh/${firstsite}/fullcrt
+      cp /etc/nginx/dummykeys/dummy.key /etc/nginx/acme.sh/${firstsite}/key
+    fi
   fi
   for gsite in ${globalsites}; do
     if [ "$(echo ${gsite} | grep '\.')" = "" ]; then
