@@ -35,6 +35,9 @@ server {
 " > /etc/nginx/conf.d/__default.conf
 fi
 
+# Generate health checks
+echo > "#! /bin/sh" > /health.sh
+
 # Attempt to contact all websites before starting up nginx
 # so we dont forward traffic to nothing. This also allows the websites
 # to be registered with the DNS service. Exclude any sites we cant find.
@@ -48,6 +51,7 @@ while : ; do
     site=$(echo $website | cut -d"#" -f 1)
     port=$(echo $website | cut -d"#" -f 2)
     globalsites=$(echo $website | cut -d"#" -f 3)
+    firstsite=$(echo $globalsites | sed "s/,/ /g" | cut -d" " -f 1)
     enabled=$(echo $website | cut -d"#" -f 4)
     ip=$(echo $website | cut -d"#" -f 5)
     if [ "$enabled" = "true" ]; then
@@ -69,6 +73,7 @@ while : ; do
       else
         echo "${attempts}: Failed to ping ${site}/${ip}"
       fi
+      echo "curl -f http://${firstsite} || exit 1" >> /health.sh
     fi
   done
   if [ $attempts = 0 -o $failed = 0 ]; then
