@@ -36,7 +36,7 @@ server {
 fi
 
 # Generate health checks
-echo > "#! /bin/sh" > /health.sh
+echo "#! /bin/sh" > /health.sh
 
 # Attempt to contact all websites before starting up nginx
 # so we dont forward traffic to nothing. This also allows the websites
@@ -73,7 +73,9 @@ while : ; do
       else
         echo "${attempts}: Failed to ping ${site}/${ip}"
       fi
-      echo "curl -f http://${firstsite} || exit 1" >> /health.sh
+      if [ "${firstsite}" != "" ]; then
+        echo "curl -L http://${firstsite} || exit 1" >> /health.sh
+      fi
     fi
   done
   if [ $attempts = 0 -o $failed = 0 ]; then
@@ -273,6 +275,7 @@ ${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
       echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
     fi
   done
+  echo "curl -L http://${firstsite} || exit 1" >> /health.sh
 done
 
 for website in ${REDIRECT_WEBSITES}; do
@@ -335,6 +338,7 @@ ${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
       echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
     fi
   done
+  echo "curl -L http://${firstsite} || exit 1" >> /health.sh
 done
 
 nginx
@@ -410,14 +414,11 @@ if [ "${LETS_ENCRYPT}" = "true" ]; then
   crond
 fi
 
+echo "exit 0" >> /health.sh
+chmod 777 /health.sh
+
 # Run until stopped
 trap "nginx -s quit ; killall dnsmasq crond; exit" TERM INT
 
-# If we failed to start all the websites, we will restart this whole process in 10 minutes
-# in case the site came online. Otherwise we can wait forever.
-if [ $failed = 1 ]; then
-  sleep 600 &
-else
-  sleep 2147483647d &
-fi
+sleep 2147483647d &
 wait "$!"
