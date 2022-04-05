@@ -16,6 +16,6 @@ EXPOSE 80 443
 
 VOLUME /etc/nginx/acme.sh /etc/acme.sh/data
 
-HEALTHCHECK --interval=60s --timeout=5s CMD /health.sh
+HEALTHCHECK --interval=120s --timeout=30s --retries=10 CMD /health.sh
 
 ENTRYPOINT ["/startup.sh"]
