@@ -74,7 +74,7 @@ while : ; do
         echo "${attempts}: Failed to ping ${site}/${ip}"
       fi
       if [ "${firstsite}" != "" ]; then
-        echo "curl -L http://${firstsite} || exit 1" >> /health.sh
+        echo "curl -f -L http://${firstsite} || exit 1" >> /health.sh
       fi
     fi
   done
@@ -275,7 +275,7 @@ ${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
       echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
     fi
   done
-  echo "curl -L http://${firstsite} || exit 1" >> /health.sh
+  echo "curl -f -L http://${firstsite} || exit 1" >> /health.sh
 done
 
 for website in ${REDIRECT_WEBSITES}; do
@@ -338,7 +338,7 @@ ${IP} ${gsite}.${__DOMAINNAME}" > /etc/dnshosts.d/${gsite}.conf
       echo "${IP} ${gsite}" > /etc/dnshosts.d/${gsite}.conf
     fi
   done
-  echo "curl -L http://${firstsite} || exit 1" >> /health.sh
+  echo "curl -f -L http://${firstsite} || exit 1" >> /health.sh
 done
 
 nginx
