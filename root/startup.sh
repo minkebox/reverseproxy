@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/sh -x
 
 IFACE=eth0
 
