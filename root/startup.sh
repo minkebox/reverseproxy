@@ -9,6 +9,7 @@ dnsmasq
 
 # Setup acme.sh
 . /etc/acme.sh/acme.sh.env
+acme.sh --set-default-ca --server letsencrypt
 
 # By default, if we cannot identify the correct server, we 404.
 if [ "${LETS_ENCRYPT}" = "false" ]; then
