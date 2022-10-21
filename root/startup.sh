@@ -118,6 +118,7 @@ server {
     proxy_set_header Connection "Upgrade";
     proxy_pass http://${site}:${port};
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
@@ -133,6 +134,7 @@ server {
   location ~ {
     return 302 https://${firstsite}\$request_uri;
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 server {
@@ -161,6 +163,7 @@ server {
     proxy_set_header Connection "Upgrade";
     proxy_pass http://${site}:${port};
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
@@ -213,6 +216,7 @@ server {
     proxy_set_header Connection "Upgrade";
     proxy_pass ${url};
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
@@ -228,6 +232,7 @@ server {
   location ~ {
     return 302 https://${firstsite}\$request_uri;
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 server {
@@ -256,6 +261,7 @@ server {
     proxy_set_header Connection "Upgrade";
     proxy_pass ${url};
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
@@ -292,6 +298,7 @@ server {
   location ~ {
     return 302 ${url}\$request_uri;
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
@@ -307,6 +314,7 @@ server {
   location ~ {
     return 302 ${url}/\$request_uri;
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 server {
@@ -319,6 +327,7 @@ server {
   location ~ {
     return 302 ${url}/\$request_uri;
   }
+  add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
 }
 " > /etc/nginx/sites-enabled/${firstsite}.conf
