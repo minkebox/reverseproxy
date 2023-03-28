@@ -4,4 +4,4 @@ include:
 
 variables:
   CI_BUILDX_ARCHS: "linux/arm64,linux/amd64"
-  
+  CI_DEFAULT_BRANCH: "master" 
