@@ -110,8 +110,8 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    set $backend "http://${site}:${port}";
-    proxy_pass $backend;
+    set \$backend "http://${site}:${port}";
+    proxy_pass \$backend;
   }
   location @websocket {
     resolver ${__DNSSERVER} valid=30s;
@@ -119,8 +119,8 @@ server {
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "Upgrade";
-    set $backend "http://${site}:${port}";
-    proxy_pass $backend;
+    set \$backend "http://${site}:${port}";
+    proxy_pass \$backend;
   }
   add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
@@ -159,8 +159,8 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    set $backend "http://${site}:${port}";
-    proxy_pass $backend;
+    set \$backend "http://${site}:${port}";
+    proxy_pass \$backend;
   }
   location @websocket {
     resolver ${__DNSSERVER} valid=30s;
@@ -168,8 +168,8 @@ server {
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "Upgrade";
-    set $backend "http://${site}:${port}";
-    proxy_pass $backend;
+    set \$backend "http://${site}:${port}";
+    proxy_pass \$backend;
   }
   add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
@@ -216,8 +216,8 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    set $backend "${url}";
-    proxy_pass $backend;
+    set \$backend "${url}";
+    proxy_pass \$backend;
   }
   location @websocket {
     resolver ${__DNSSERVER} valid=30s;
@@ -225,8 +225,8 @@ server {
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "Upgrade";
-    set $backend "${url}";
-    proxy_pass $backend;
+    set \$backend "${url}";
+    proxy_pass \$backend;
   }
   add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
@@ -265,8 +265,8 @@ server {
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header X-Forwarded-Host \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    set $backend "${url}";
-    proxy_pass $backend;
+    set \$backend "${url}";
+    proxy_pass \$backend;
   }
   location @websocket {
     resolver ${__DNSSERVER} valid=30s;
@@ -274,8 +274,8 @@ server {
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "Upgrade";
-    set $backend "${url}";
-    proxy_pass $backend;
+    set \$backend "${url}";
+    proxy_pass \$backend;
   }
   add_header Access-Control-Allow-Origin *;
   access_log /var/log/nginx/${firstsite}-access.log;
