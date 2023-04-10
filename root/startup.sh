@@ -103,7 +103,7 @@ server {
     try_files /nonexistant @\$http_upgrade;
   }
   location @ {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -114,7 +114,7 @@ server {
     proxy_pass \$backend;
   }
   location @websocket {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     proxy_set_header Host \$host;
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
@@ -152,7 +152,7 @@ server {
     try_files /nonexistant @\$http_upgrade;
   }
   location @ {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -163,7 +163,7 @@ server {
     proxy_pass \$backend;
   }
   location @websocket {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     proxy_set_header Host \$host;
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
@@ -209,7 +209,7 @@ server {
     try_files /nonexistant @\$http_upgrade;
   }
   location @ {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -220,7 +220,7 @@ server {
     proxy_pass \$backend;
   }
   location @websocket {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     proxy_set_header Host \$host;
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
@@ -258,7 +258,7 @@ server {
     try_files /nonexistant @\$http_upgrade;
   }
   location @ {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     client_max_body_size 100M;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -269,7 +269,7 @@ server {
     proxy_pass \$backend;
   }
   location @websocket {
-    resolver ${__DNSSERVER} valid=30s;
+    resolver ${__DNSSERVER} ipv6=off valid=30s;
     proxy_set_header Host \$host;
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
