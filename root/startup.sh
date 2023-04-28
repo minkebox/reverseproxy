@@ -388,7 +388,7 @@ if [ "${LETS_ENCRYPT}" = "true" ]; then
       # Request keys if we're currently using the dummy key
       if cmp -s /etc/nginx/acme.sh/${firstsite}/key /etc/nginx/dummykeys/dummy.key; then
         acme.sh --issue --force -d $(echo ${globalsites} | sed "s/ / -d /g") -w /acme
-        if [ -e /etc/acme.sh/data/${firstsite}/${firstsite}.cer ]; then
+        if [ -e /etc/acme.sh/data/${firstsite}*/${firstsite}.cer ]; then
           acme.sh --install-cert -d ${firstsite} \
             --cert-file /etc/nginx/acme.sh/${firstsite}/crt \
             --key-file /etc/nginx/acme.sh/${firstsite}/key \
@@ -406,7 +406,7 @@ if [ "${LETS_ENCRYPT}" = "true" ]; then
     # Request keys if we're currently using the dummy key
     if cmp -s /etc/nginx/acme.sh/${firstsite}/key /etc/nginx/dummykeys/dummy.key; then
       acme.sh --issue --force -d $(echo ${globalsites} | sed "s/ / -d /g") -w /acme
-      if [ -e /etc/acme.sh/data/${firstsite}/${firstsite}.cer ]; then
+      if [ -e /etc/acme.sh/data/${firstsite}*/${firstsite}.cer ]; then
         acme.sh --install-cert -d ${firstsite} \
           --cert-file /etc/nginx/acme.sh/${firstsite}/crt \
           --key-file /etc/nginx/acme.sh/${firstsite}/key \
@@ -423,7 +423,7 @@ if [ "${LETS_ENCRYPT}" = "true" ]; then
     # Request keys if we're currently using the dummy key
     if cmp -s /etc/nginx/acme.sh/${firstsite}/key /etc/nginx/dummykeys/dummy.key; then
       acme.sh --issue --force -d $(echo ${globalsites} | sed "s/ / -d /g") -w /acme
-      if [ -e /etc/acme.sh/data/${firstsite}/${firstsite}.cer ]; then
+      if [ -e /etc/acme.sh/data/${firstsite}*/${firstsite}.cer ]; then
         acme.sh --install-cert -d ${firstsite} \
           --cert-file /etc/nginx/acme.sh/${firstsite}/crt \
           --key-file /etc/nginx/acme.sh/${firstsite}/key \
