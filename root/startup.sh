@@ -37,54 +37,54 @@ server {
 fi
 
 # Generate health checks
-echo "#! /bin/sh" > /health.sh
+#echo "#! /bin/sh" > /health.sh
 
 # Attempt to contact all websites before starting up nginx
 # so we dont forward traffic to nothing. This also allows the websites
 # to be registered with the DNS service. Exclude any sites we cant find.
-attempts=3
-failed=1
-while : ; do
-  failed=0
-  attempts=$(expr $attempts - 1)
-  AWEBSITES=""
-  for website in ${WEBSITES}; do
-    site=$(echo $website | cut -d"#" -f 1)
-    port=$(echo $website | cut -d"#" -f 2)
-    globalsites=$(echo $website | cut -d"#" -f 3)
-    firstsite=$(echo $globalsites | sed "s/,/ /g" | cut -d" " -f 1)
-    enabled=$(echo $website | cut -d"#" -f 4)
-    ip=$(echo $website | cut -d"#" -f 5)
-    if [ "$enabled" = "true" ]; then
-      # Check hostname first
-      okay=1
-      check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
-      if [ "$check" = "fail" ]; then
-        # Fallback on ip
-        check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
-        if [ "$check" = "fail" ]; then
-          failed=1
-          okay=0
-        else
-          site=$ip
-        fi
-      fi
-      if [ "$okay" = "1" ]; then
-        AWEBSITES="${AWEBSITES} $site#$port#$globalsites#$enabled"
-      else
-        echo "${attempts}: Failed to ping ${site}/${ip}"
-      fi
-      if [ "${firstsite}" != "" ]; then
-        echo "curl -L http://${firstsite} || exit 1" >> /health.sh
-      fi
-    fi
-  done
-  if [ $attempts = 0 -o $failed = 0 ]; then
-    WEBSITES=${AWEBSITES}
-    break
-  fi
-  sleep 10
-done
+#attempts=3
+#failed=1
+#while : ; do
+#  failed=0
+#  attempts=$(expr $attempts - 1)
+#  AWEBSITES=""
+#  for website in ${WEBSITES}; do
+#    site=$(echo $website | cut -d"#" -f 1)
+#    port=$(echo $website | cut -d"#" -f 2)
+#    globalsites=$(echo $website | cut -d"#" -f 3)
+#    firstsite=$(echo $globalsites | sed "s/,/ /g" | cut -d" " -f 1)
+#    enabled=$(echo $website | cut -d"#" -f 4)
+#    ip=$(echo $website | cut -d"#" -f 5)
+#    if [ "$enabled" = "true" ]; then
+#      # Check hostname first
+#      okay=1
+#      check=$(ping -c 1 -W 1 $site > /dev/null 2>&1 || echo 'fail');
+#      if [ "$check" = "fail" ]; then
+#        # Fallback on ip
+#        check=$(ping -c 1 -W 1 $ip > /dev/null 2>&1 || echo 'fail');
+#        if [ "$check" = "fail" ]; then
+#          failed=1
+#          okay=0
+#        else
+#          site=$ip
+#        fi
+#      fi
+#      if [ "$okay" = "1" ]; then
+#        AWEBSITES="${AWEBSITES} $site#$port#$globalsites#$enabled"
+#      else
+#        echo "${attempts}: Failed to ping ${site}/${ip}"
+#      fi
+#      if [ "${firstsite}" != "" ]; then
+#        echo "curl -L http://${firstsite} || exit 1" >> /health.sh
+#      fi
+#    fi
+#  done
+#  if [ $attempts = 0 -o $failed = 0 ]; then
+#    WEBSITES=${AWEBSITES}
+#    break
+#  fi
+#  sleep 10
+#done
 
 for website in ${WEBSITES}; do
   site=$(echo $website | cut -d"#" -f 1)
